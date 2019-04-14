@@ -87,5 +87,3 @@ def get_filename(date, username):
     filename = username + '_' + date + '_stats.json'
     log.debug('filename: ' + filename)
     return filename
-
-lambda_handler('event', 'context')
