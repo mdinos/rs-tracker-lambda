@@ -6,6 +6,11 @@ Grab rs stats from API and store in S3 AWS lambda.
 Firstly, set environment variables:
 `$ username='<rs user name>'`
 
+You'll have to add a line invoking the lambda locally:
+```
+lambda_handler('event','context')
+```
+
 Run the script:
 ```
 python rs_tracker_lambda.py
