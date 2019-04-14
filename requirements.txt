@@ -1,0 +1,13 @@
+cryptography==2.0.3
+pyasn1==0.4.5
+certifi==2019.3.9
+Image==1.5.27
+pyOpenSSL==19.0.0
+Pillow==6.0.0
+elementtree==1.2.6-20050316
+protobuf==3.7.1
+lxml==4.3.3
+ndg_httpsclient==0.5.1
+ordereddict==1.1
+Pygments==2.3.1
+simplejson==3.16.0
