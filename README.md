@@ -3,6 +3,15 @@ Grab rs stats from API and store in S3 AWS lambda.
 
 ## usage
 
+Firstly, set environment variables:
+`$ username='<rs user name>'`
+
+Run the script:
+```
+python rs_tracker_lambda.py
+```
+
+## packaging to lambda format
 `./package.sh` will generate a .zip object in `../`
 
 can be used with some basic terraform:
@@ -23,4 +32,13 @@ resource "aws_lambda_function" "rs_tracker_lamda" {
         }
     }
 }
+```
+
+## requirements
+
+Pips will be installed by package.sh when zipped, but to install dependencies for development, cd to directory and::
+```
+pip install pipreqs
+pipreqs ./
+pip install -r requirements.txt
 ```

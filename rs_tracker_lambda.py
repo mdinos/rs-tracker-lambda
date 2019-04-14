@@ -30,18 +30,7 @@ def lambda_handler(event, context):
             break
 
     filename = get_filename(date, username)
-
-    log.debug('about to connect to s3')
-    client = boto3.client('s3')
-    log.debug('connected to s3')
-    tmpfile = open('/tmp/' + filename, 'w')
-    tmpfile.write(json.dumps(stats_dict, indent=4))
-    tmpfile.close()
-    log.debug('written to file')
-    with open('/tmp/' + filename, 'rb') as file:
-        client.upload_fileobj(file, 'rs-tracker-lambda', username + '/' + filename)
-
-    log.debug('written file to s3')
+    upload_to_s3(filename, stats_dict)
 
 def get_skills():
     skills = [
@@ -71,6 +60,7 @@ def get_date():
 def generate_dict_entries(stats_list, skills):
     for i, skill in enumerate(skills):
         skill_split = stats_list[i].split(',')
+        log.debug('split stats into list for ' + skill)
         for i, entry in enumerate(skill_split):
             skill_split[i] = int(entry)
 
@@ -80,6 +70,7 @@ def generate_dict_entries(stats_list, skills):
             'experience': skill_split[2],
             'skill': skill
         }
+        log.debug('Made dict entry for ' + skill)
 
         yield dict_entry
 
@@ -87,3 +78,17 @@ def get_filename(date, username):
     filename = username + '_' + date + '_stats.json'
     log.debug('filename: ' + filename)
     return filename
+
+def upload_to_s3(filename, stats_dict):
+    log.debug('about to connect to s3')
+    client = boto3.client('s3')
+
+    log.debug('connected to s3')
+    tmpfile = open('/tmp/' + filename, 'w')
+    tmpfile.write(json.dumps(stats_dict, indent=4))
+    tmpfile.close()
+    log.debug('written to file')
+
+    with open('/tmp/' + filename, 'rb') as file:
+        client.upload_fileobj(file, 'rs-tracker-lambda', username + '/' + filename)
+    log.debug('written file to s3')

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# ensure pipreqs is installed (will be fine if it is)
+pip3.6 install pipreqs
+
 # Get pip requirements
 pipreqs --force ./
 
