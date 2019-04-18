@@ -53,7 +53,7 @@ def get_raw_highscores_data(username):
     return stats_list
 
 def get_date():
-    date = datetime.now(timezone.utc).astimezone().isoformat()[:20]
+    date = datetime.now(timezone.utc).astimezone().isoformat()[:19]
     log.debug('date: ' + date)
     return date
     
@@ -61,8 +61,8 @@ def generate_dict_entries(stats_list, skills):
     for i, skill in enumerate(skills):
         skill_split = stats_list[i].split(',')
         log.debug('split stats into list for ' + skill)
-        for i, entry in enumerate(skill_split):
-            skill_split[i] = int(entry)
+        for j, entry in enumerate(skill_split):
+            skill_split[j] = int(entry)
 
         dict_entry = {
             'rank': skill_split[0],
@@ -76,6 +76,7 @@ def generate_dict_entries(stats_list, skills):
 
 def get_filename(date, username):
     filename = username + '_' + date + '_stats.json'
+    print(filename)
     log.debug('filename: ' + filename)
     return filename
 
