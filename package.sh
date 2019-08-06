@@ -15,4 +15,3 @@ zip -r9 ../rs_tracker_lambda.zip .
 # clean up
 rm -rf */
 rm six.py*
-rm requirements.txt

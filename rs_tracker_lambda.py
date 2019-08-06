@@ -10,10 +10,10 @@ log = logging.getLogger('rs_tracker_lambda')
 log.setLevel(logging.DEBUG)
 
 username = os.environ['username']
+bucket = os.environ['bucket']
 
 def lambda_handler(event, context):
-    stats_list = get_raw_highscores_data(username)
-    log.debug('got data')
+    stats_list = get_raw_hiscores_data(username)
     date = get_date()
     stats_dict = {
         'date': date,
@@ -26,11 +26,11 @@ def lambda_handler(event, context):
         try:
             entry = next(dict_entries)
             stats_dict['stats'].append(entry)
-        except:
+        except StopIteration:
             break
 
     filename = get_filename(date, username)
-    upload_to_s3(filename, stats_dict)
+    upload_to_s3(filename, stats_dict, bucket)
 
 def get_skills():
     skills = [
@@ -39,57 +39,62 @@ def get_skills():
         'fletching', 'fishing', 'firemaking', 'crafting', 'smithing',
         'mining', 'herblore', 'agility', 'thieving', 'slayer',
         'farming', 'runecrafting', 'hunter', 'construction' ]
-    log.debug('got skills')
+    log.debug('[\u2714] Returning skills')
     return skills
 
-def get_raw_highscores_data(username):
-    log.debug('start get_raw_highscores_data ' + username)
-    rs = requests.Session()
-    stats = rs.get('https://secure.runescape.com/m=hiscore_oldschool/index_lite.ws?player=' + username)
-    log.debug('stats got')
+def get_raw_hiscores_data(username):
+    log.debug('[-] Attempting to get {}\'s statistics.'.format(username))
+    stats = requests.get('https://secure.runescape.com/m=hiscore_oldschool/index_lite.ws?player=' + username)
+    if stats.status_code != 200:
+        log.debug('[\u2718] Response from RS status code [{}]'.format(stats.status_code))
+        return None
+    log.debug('[\u2714] Sucessfully recieved stats')
     stats_list = stats.text.split('\n')
     log.debug(stats_list)
-
     return stats_list
 
 def get_date():
     date = datetime.now(timezone.utc).astimezone().isoformat()[:19]
-    log.debug('date: ' + date)
+    log.debug('[\u2714] Date: ' + date)
     return date
     
 def generate_dict_entries(stats_list, skills):
     for i, skill in enumerate(skills):
         skill_split = stats_list[i].split(',')
-        log.debug('split stats into list for ' + skill)
-        for j, entry in enumerate(skill_split):
-            skill_split[j] = int(entry)
+        log.debug('[\u2714] Extrapolated stats to list ' + skill)
+        for i, entry in enumerate(skill_split):
+            skill_split[i] = int(entry)
 
-        dict_entry = {
-            'rank': skill_split[0],
-            'level': skill_split[1],
-            'experience': skill_split[2],
-            'skill': skill
-        }
-        log.debug('Made dict entry for ' + skill)
+        dict_entry = dict(
+            skill = skill,
+            rank = skill_split[0],
+            level = skill_split[1],
+            experience = skill_split[2]
+        )
+        log.debug('[\u2714] Successfully generated {} dictionary.'.format(skill))
 
         yield dict_entry
 
 def get_filename(date, username):
     filename = username + '_' + date + '_stats.json'
-    print(filename)
-    log.debug('filename: ' + filename)
+    log.debug('[\u2714] Filename: ' + filename)
     return filename
 
-def upload_to_s3(filename, stats_dict):
-    log.debug('about to connect to s3')
+def upload_to_s3(filename, stats_dict, bucket='rs-tracker-lambda'):
+    log.debug('[-] Attempting to connect to S3 bucket {}.'.format(bucket))
     client = boto3.client('s3')
-
-    log.debug('connected to s3')
-    tmpfile = open('/tmp/' + filename, 'w')
-    tmpfile.write(json.dumps(stats_dict, indent=4))
-    tmpfile.close()
-    log.debug('written to file')
-
-    with open('/tmp/' + filename, 'rb') as file:
-        client.upload_fileobj(file, 'rs-tracker-lambda', username + '/' + filename)
-    log.debug('written file to s3')
+    log.debug('[-] S3 Client established.')
+    try:
+        tmpfile = open('/tmp/' + filename, 'w')
+        log.debug('[\u2714] Created file at /tmp/{}'.format(filename))
+        tmpfile.write(json.dumps(stats_dict, indent=4))
+        log.debug('[\u2714] Written to temporary file /tmp/{}'.format(filename))
+        tmpfile.close()
+        with open('/tmp/' + filename, 'rb') as file:
+            client.upload_fileobj(file, bucket, username + '/' + filename)
+        log.debug('[\u2714] Object successfilly uploaded to S3.')
+        os.remove('/tmp/' + filename)
+        log.debug('[\u2714] Temporary file deleted.')
+    except Exception as e:
+        log.error('[\u2718] An error occurred: {}'.format(e))
+        raise e
