@@ -12,7 +12,7 @@ log.setLevel(logging.DEBUG)
 username = os.environ['username']
 
 def lambda_handler(event, context):
-    stats_list = get_raw_highscores_data(username)
+    stats_list = get_raw_hiscores_data(username)
     log.debug('got data')
     date = get_date()
     stats_dict = {
@@ -42,8 +42,8 @@ def get_skills():
     log.debug('got skills')
     return skills
 
-def get_raw_highscores_data(username):
-    log.debug('start get_raw_highscores_data ' + username)
+def get_raw_hiscores_data(username):
+    log.debug('start get_raw_hiscores_data ' + username)
     rs = requests.Session()
     stats = rs.get('https://secure.runescape.com/m=hiscore_oldschool/index_lite.ws?player=' + username)
     log.debug('stats got')
