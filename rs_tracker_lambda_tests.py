@@ -14,17 +14,20 @@ class GetSkills(TestCase):
             'range', 'prayer', 'magic', 'cooking', 'woodcutting',
             'fletching', 'fishing', 'firemaking', 'crafting', 'smithing',
             'mining', 'herblore', 'agility', 'thieving', 'slayer',
-            'farming', 'runecrafting', 'hunter', 'construction']
-                         )
+            'farming', 'runecrafting', 'hunter', 'construction'])
 
 class GetHiScores(TestCase):
     def setUp(self):
-        self.username = 'woofythedog'
+        pass
 
     def test_get_raw_hs_data(self):
-        data = rs_tracker_lambda.get_raw_hiscores_data(self.username)
+        data = rs_tracker_lambda.get_raw_hiscores_data('woofythedog')
         self.assertEqual(len(data), 35)
         self.assertEqual(type(data), list)
+
+    def test_bad_username(self):
+        data = rs_tracker_lambda.get_raw_hiscores_data('theoldnite')
+        self.assertEqual(data, None)
 
 class SkillsGenerator(TestCase):
     def setUp(self):
