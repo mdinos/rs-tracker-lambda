@@ -39,7 +39,7 @@ def lambda_handler(event=None, context=None):
 
 def get_skills():
     """
-        :returns: An ordered list of skills, in the order that the RS API
+        :returns: An ordered list of skills, in the order that the RS API 
                   returns them.
     """
     skills = [
@@ -62,7 +62,7 @@ def check_username_validity(username: str):
         return False
 
 def get_raw_hiscores_data(username: str):
-    """
+    """ 
         Fetch hiscores data from RS hiscores site
         :param username: A (preferably valid) rs username
 
@@ -138,8 +138,8 @@ def upload_to_s3(filename: str, stats_dict: dict, bucket='rs-tracker-lambda'):
         tmpfile = open('/tmp/' + filename, 'w')
         log.debug('[\u2714] Created file at /tmp/{}'.format(filename))
         tmpfile.write(json.dumps(stats_dict, indent=4))
-        log.debug('[\u2714] Written to temporary file /tmp/{}'.format(filename))
         tmpfile.close()
+        log.debug('[\u2714] Written to temporary file /tmp/{}'.format(filename))
         with open('/tmp/' + filename, 'rb') as file:
             client.upload_fileobj(file, bucket, username + '/' + filename)
         log.debug('[\u2714] Object successfilly uploaded to S3.')
