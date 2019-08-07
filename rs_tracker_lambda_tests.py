@@ -17,8 +17,6 @@ class GetSkills(TestCase):
             'farming', 'runecrafting', 'hunter', 'construction'])
 
 class GetHiScores(TestCase):
-    def setUp(self):
-        pass
 
     def test_get_raw_hs_data(self):
         data = rs_tracker_lambda.get_raw_hiscores_data('woofythedog')
@@ -29,6 +27,59 @@ class GetHiScores(TestCase):
         data = rs_tracker_lambda.get_raw_hiscores_data('theoldnite')
         self.assertEqual(data, None)
 
+    def test_invalid_username_with_non_alphanumeric_chars(self):
+        with self.assertRaises(ValueError):
+            rs_tracker_lambda.get_raw_hiscores_data('hello:there:')
+
+    def test_invalid_username_with_escape_string(self):
+        with self.assertRaises(ValueError):
+            rs_tracker_lambda.get_raw_hiscores_data('\nhellothe')
+
+    def test_invalid_length(self):
+        with self.assertRaises(ValueError):
+            rs_tracker_lambda.get_raw_hiscores_data('thisis13chars')
+
+    def test_empty_username(self):
+        with self.assertRaises(ValueError):
+            rs_tracker_lambda.get_raw_hiscores_data('')
+
+    def test_valid_length(self):
+        data = rs_tracker_lambda.get_raw_hiscores_data('disis12chars')
+        self.assertEqual(data, None)
+
+    def test_length_check_with_hyphens(self):
+        data = rs_tracker_lambda.get_raw_hiscores_data('woofy-dog_-')
+        self.assertEqual(data, None)
+
+    def test_lynx_titan(self):
+        # Lynx Titan has maxed out stats, so these values won't ever change.
+        data = rs_tracker_lambda.get_raw_hiscores_data('Lynx Titan')
+        self.assertEqual(data[0:24],
+                            ['1,2277,4600000000',
+                                '15,99,200000000',
+                                '27,99,200000000',
+                                '18,99,200000000',
+                                '7,99,200000000',
+                                '7,99,200000000',
+                                '11,99,200000000',
+                                '32,99,200000000',
+                                '158,99,200000000',
+                                '15,99,200000000',
+                                '12,99,200000000',
+                                '9,99,200000000',
+                                '49,99,200000000',
+                                '4,99,200000000',
+                                '3,99,200000000',
+                                '25,99,200000000',
+                                '5,99,200000000',
+                                '24,99,200000000',
+                                '12,99,200000000',
+                                '2,99,200000000',
+                                '19,99,200000000',
+                                '7,99,200000000',
+                                '4,99,200000000',
+                                '4,99,200000000'])
+
 class SkillsGenerator(TestCase):
     def setUp(self):
         self.skills = rs_tracker_lambda.get_skills()
@@ -36,7 +87,7 @@ class SkillsGenerator(TestCase):
         self.generator = rs_tracker_lambda.generate_dict_entries(self.hiscores_data, self.skills)
         self.counter = 0
     
-    def check_level_valid(self, level_string):
+    def _check_level_valid(self, level_string):
         if 1 <= int(level_string) <= 99:
             return True
         else:
@@ -53,7 +104,7 @@ class SkillsGenerator(TestCase):
                 self.assertEqual(result['skill'], self.skills[self.counter])
                 print(result['level'])
                 if self.counter != 0:
-                    self.assertEqual(self.check_level_valid(result['level']), True)
+                    self.assertEqual(self._check_level_valid(result['level']), True)
                 self.counter += 1
             except StopIteration:
                 break
