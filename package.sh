@@ -10,7 +10,7 @@ pipreqs --force ./
 pip install -r requirements.txt --target .
 
 # zip up folder contents and place them in ../
-zip -r9 ../rs_tracker_lambda.zip .
+zip -r9 ../rs-tracker-lambda.zip .
 
 # clean up
 rm -rf */
