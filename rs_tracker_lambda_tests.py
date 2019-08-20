@@ -6,6 +6,12 @@ import json
 import requests
 import os
 
+class LambdaHandler(TestCase):
+
+    def setUp(self):
+        pass
+
+
 class GetSkills(TestCase):
 
     def test_get_skills_function(self):
@@ -38,11 +44,11 @@ class GetHiScores(TestCase):
     def test_invalid_length(self):
         with self.assertRaises(ValueError):
             rs_tracker_lambda.get_raw_hiscores_data('thisis13chars')
-
+    
     def test_empty_username(self):
         with self.assertRaises(ValueError):
             rs_tracker_lambda.get_raw_hiscores_data('')
-
+    
     def test_valid_length(self):
         data = rs_tracker_lambda.get_raw_hiscores_data('disis12chars')
         self.assertEqual(data, None)
@@ -54,30 +60,30 @@ class GetHiScores(TestCase):
     def test_lynx_titan(self):
         # Lynx Titan has maxed out stats, so these values won't ever change.
         data = rs_tracker_lambda.get_raw_hiscores_data('Lynx Titan')
-        self.assertEqual(data[0:24],
-                            ['1,2277,4600000000',
-                                '15,99,200000000',
-                                '27,99,200000000',
-                                '18,99,200000000',
-                                '7,99,200000000',
-                                '7,99,200000000',
-                                '11,99,200000000',
-                                '32,99,200000000',
-                                '158,99,200000000',
-                                '15,99,200000000',
-                                '12,99,200000000',
-                                '9,99,200000000',
-                                '49,99,200000000',
-                                '4,99,200000000',
-                                '3,99,200000000',
-                                '25,99,200000000',
-                                '5,99,200000000',
-                                '24,99,200000000',
-                                '12,99,200000000',
-                                '2,99,200000000',
-                                '19,99,200000000',
-                                '7,99,200000000',
-                                '4,99,200000000',
+        self.assertEqual(data[0:24], 
+                            ['1,2277,4600000000', 
+                                '15,99,200000000', 
+                                '27,99,200000000', 
+                                '18,99,200000000', 
+                                '7,99,200000000', 
+                                '7,99,200000000', 
+                                '11,99,200000000', 
+                                '32,99,200000000', 
+                                '158,99,200000000', 
+                                '15,99,200000000', 
+                                '12,99,200000000', 
+                                '9,99,200000000', 
+                                '49,99,200000000', 
+                                '4,99,200000000', 
+                                '3,99,200000000', 
+                                '25,99,200000000', 
+                                '5,99,200000000', 
+                                '24,99,200000000', 
+                                '12,99,200000000', 
+                                '2,99,200000000', 
+                                '19,99,200000000', 
+                                '7,99,200000000', 
+                                '4,99,200000000', 
                                 '4,99,200000000'])
 
 class SkillsGenerator(TestCase):

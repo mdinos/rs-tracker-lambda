@@ -9,7 +9,6 @@ import logging
 log = logging.getLogger('rs_tracker_lambda')
 log.setLevel(logging.DEBUG)
 
-username = os.environ['username']
 bucket = os.environ['bucket']
 
 def lambda_handler(event=None, context=None):
@@ -18,24 +17,19 @@ def lambda_handler(event=None, context=None):
         :param event: Event object from AWS events - does nothing in this script
         :param context: Context object from AWS events - ditto above
     """
-    stats_list = get_raw_hiscores_data(username)
-    date = get_date()
-    stats_dict = {
-        'date': date,
-        'stats': []
-    }
     skills = get_skills()
+    users = get_users(bucket)
 
-    dict_entries = generate_dict_entries(stats_list, skills)
-    while True:
-        try:
-            entry = next(dict_entries)
-            stats_dict['stats'].append(entry)
-        except StopIteration:
-            break
+    for user in users:
+        main_loop(user, bucket, skills)
 
-    filename = get_filename(date, username)
-    upload_to_s3(filename, stats_dict, bucket)
+def get_users(bucket='rs-tracker-lambda'):
+    client = boto3.resource('s3')
+    client.Object(bucket, 'users.json').download_file('/tmp/users.json')
+    with open('/tmp/users.json', 'r') as users_json:
+        users = json.loads(users_json.read())
+    return users['users']
+
 
 def get_skills():
     """
@@ -125,7 +119,7 @@ def get_filename(date: str, username: str):
     log.debug('[\u2714] Filename: ' + filename)
     return filename
 
-def upload_to_s3(filename: str, stats_dict: dict, bucket='rs-tracker-lambda'):
+def upload_to_s3(filename: str, stats_dict: dict, username: str, bucket='rs-tracker-lambda'):
     """
         :param filename: A fully formed filename generated from the get_filename() function
         :param stats_dict: A stats dictionary as generated in lambda_handler() function
@@ -148,3 +142,22 @@ def upload_to_s3(filename: str, stats_dict: dict, bucket='rs-tracker-lambda'):
     except Exception as e:
         log.error('[\u2718] An error occurred: {}'.format(e))
         raise e
+
+def main_loop(username, bucket, skills):
+    stats_list = get_raw_hiscores_data(username)
+    date = get_date()
+    stats_dict = {
+        'date': date,
+        'stats': []
+    }
+
+    dict_entries = generate_dict_entries(stats_list, skills)
+    while True:
+        try:
+            entry = next(dict_entries)
+            stats_dict['stats'].append(entry)
+        except StopIteration:
+            break
+
+    filename = get_filename(date, username)
+    upload_to_s3(filename, stats_dict, username, bucket)
