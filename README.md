@@ -1,6 +1,8 @@
 # rs-tracker-lambda
 Grab rs stats from API and store in S3 AWS lambda.
 
+This works in conjunction with the web app in my `ami-nginx` repo and the `rs-api` container in https://github.com/mdinos/mdinos-docker
+
 ## usage
 
 Firstly, set environment variables:
