@@ -33,10 +33,15 @@ resource "aws_lambda_function" "rs_tracker_lamda" {
   
     environment {
         variables = {
-            username = "<<your_username>>"
+            bucket = "<<your s3 bucket>>"
         }
     }
 }
+```
+
+In your S3 bucket, you will need a users.json file at the base level, like this:
+```json
+{ "users" : ['user_1', ..., 'user_n'] }
 ```
 
 ## requirements
