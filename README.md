@@ -5,10 +5,10 @@ This works in conjunction with the web app in my `ami-nginx` repo and the `rs-ap
 
 ## usage
 
-Firstly, set environment variables:
-`$ username='<rs user name>'`
+Firstly, set environment variable (which s3 bucket to use):
+`$ bucket='rs-tracker-lambda-bucket'`
 
-You'll have to add a line invoking the lambda locally:
+You'll have to add a line invoking the lambda locally (neither of these input vars are used in the script:
 ```
 lambda_handler('event','context')
 ```
@@ -16,6 +16,37 @@ lambda_handler('event','context')
 Run the script:
 ```
 python rs_tracker_lambda.py
+```
+
+I recommend using [aws-profile](https://github.com/jrstarke/aws-profile) (it's installable as a [pip](https://pypi.org/project/aws-profile/)) to manage your credentials when running locally - set up a role with the following permissions: (example terraform)
+```hcl
+actions = [
+      "s3:PutObject",
+      "s3:GetObject"
+    ]
+resources = [
+      "arn:aws:s3:::${var.lambda_name}*",
+    ]
+```
+
+and invoke locally like so:
+
+```shell
+aws-profile -p lambda-profile python rs_tracker_lambda.py
+```
+
+For creating the actual role for the lambda to run itself, you'll need a couple more permissions (if you want to use cloudwatch logs): (example terraform)
+```hcl
+statement {
+    actions = [
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+    ]
+
+    resources = [
+      "arn:aws:logs:${var.region}:${var.account_number}:log-group:/aws/lambda/${var.lambda_name}:*",
+    ]
+  }
 ```
 
 ## packaging to lambda format
