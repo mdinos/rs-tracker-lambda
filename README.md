@@ -54,7 +54,7 @@ statement {
 
 can be used with some basic terraform:
 
-```
+```hcl
 resource "aws_lambda_function" "rs_tracker_lamda" {
     filename         = "rs_tracker_lambda.zip"
     function_name    = "rs_tracker_lambda"
@@ -80,7 +80,7 @@ In your S3 bucket, you will need a users.json file at the base level, like this:
 ## requirements
 
 Pips will be installed by package.sh when zipped, but to install dependencies for development, cd to directory and::
-```
+```bash
 pip install pipreqs
 pipreqs ./
 pip install -r requirements.txt
