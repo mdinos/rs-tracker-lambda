@@ -9,12 +9,12 @@ Firstly, set environment variable (which s3 bucket to use):
 `$ bucket='rs-tracker-lambda-bucket'`
 
 You'll have to add a line invoking the lambda locally (neither of these input vars are used in the script:
-```
+```python
 lambda_handler('event','context')
 ```
 
 Run the script:
-```
+```bash
 python rs_tracker_lambda.py
 ```
 
